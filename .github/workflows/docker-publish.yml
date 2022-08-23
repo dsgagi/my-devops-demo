@@ -8,11 +8,11 @@ name: my-workflow
 on:
   workflow_dispatch:
   push:
-    #branches: [ "main" ]
+    branches: [ "main" ]
     # Publish semver tags as releases.
     tags: [ '*' ]
   pull_request:
-    #branches: [ "main" ]
+    branches: [ "main" ]
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -47,7 +47,7 @@ jobs:
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
       - name: Install cosign
-        if: github.event_name != 'release'
+        if: github.event_name == 'release'
         uses: sigstore/cosign-installer@7e0881f8fe90b25e305bbf0309761e9314607e25
         with:
           cosign-release: 'v1.9.0'
@@ -72,7 +72,7 @@ jobs:
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
-        if: github.event_name != 'release'
+        if: github.event_name == 'release'
         uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
         with:
           registry: ${{ env.REGISTRY }}
@@ -94,7 +94,7 @@ jobs:
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
           context: .
-          push: ${{ github.event_name != 'release' }}
+          push: ${{ github.event_name == 'release' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -104,7 +104,7 @@ jobs:
       # transparency data even for private images, pass --force to cosign below.
       # https://github.com/sigstore/cosign
       - name: Sign the published Docker image
-        if: ${{ github.event_name != 'release' }}
+        if: ${{ github.event_name == 'release' }}
         env:
           COSIGN_EXPERIMENTAL: "true"
         # This step uses the identity token to provision an ephemeral certificate
@@ -119,10 +119,11 @@ jobs:
 
       # Deploy the Docker image to the GKE cluster
       - name: Deploy to GKE
+        if: ${{ github.event_name == 'release' }}
         run: |-
           # replacing the image name in the k8s template
           #./kustomize edit set image LOCATION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE:TAG=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$GITHUB_SHA
           #./kustomize build . | kubectl apply -f -
-          kubectl set image deployment my-devops-demo my-devops-demo=${{ steps.meta.outputs.tags }}
+          kubectl set image deployment my-devops-demo my-devops-demo=$REGISTRY/$IMAGE_NAME:${{ github.ref_name }}
           kubectl rollout status deployment/$DEPLOYMENT_NAME
           kubectl get services -o wide
