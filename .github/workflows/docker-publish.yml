@@ -7,12 +7,13 @@ name: my-workflow
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ "main" ]
-    # Publish semver tags as releases.
-    tags: [ '*' ]
-  pull_request:
-    branches: [ "main" ]
+  #push:
+  #  branches: [ "main" ]
+  #  # Publish semver tags as releases.
+  #  tags: [ '*' ]
+  #pull_request:
+  #  branches: [ "main" ]
+  release:
 
 env:
   # Use docker.io for Docker Hub if empty
