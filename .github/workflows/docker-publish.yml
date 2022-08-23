@@ -123,6 +123,6 @@ jobs:
           # replacing the image name in the k8s template
           #./kustomize edit set image LOCATION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE:TAG=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$GITHUB_SHA
           #./kustomize build . | kubectl apply -f -
-          kubectl set image deployment my-devops-demo my-devops-demo=$REGISTRY/$IMAGE_NAME:${{ steps.meta.outputs.tags }}
+          kubectl set image deployment my-devops-demo my-devops-demo=${{ steps.meta.outputs.tags }}
           kubectl rollout status deployment/$DEPLOYMENT_NAME
           kubectl get services -o wide
