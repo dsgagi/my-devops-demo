@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-ingress
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: my-devops-demo.dsgagi.me
+    kubernetes.io/ingress.class: gce
+    kubernetes.io/ingress.allow-http: "true"
+    cert-manager.io/issuer: letsencrypt-production
+spec:
+  tls:
+    - secretName: web-ssl
+      hosts:
+        - my-devops-demo.dsgagi.me
+  rules:
+  - host: my-devops-demo.dsgagi.me
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: my-devops-demo-svc
+            port:
+              number: 11130

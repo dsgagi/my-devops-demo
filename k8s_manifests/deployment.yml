@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-devops-demo
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      run: my-devops-demo
+  template:
+    metadata:
+      labels:
+        run: my-devops-demo
+    spec:
+      containers:
+      - image: ghcr.io/dsgagi/my-devops-demo:main
+        imagePullPolicy: IfNotPresent
+        name: my-devops-demo
+        ports:
+        - containerPort: 11130
+          protocol: TCP
